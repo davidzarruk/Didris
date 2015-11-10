@@ -1,8 +1,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::depends(RcppGSL)]]
 
 #include <RcppArmadillo.h>
-#include <RcppGSL.h>
 #include <algorithm>
 #include <ctime>
 #include <cmath>

@@ -41,9 +41,9 @@ par.eta     = 0.5;      % Concavity of probability of completing college
 %----------------------------------------%
 
 % Prices (partial equilibrium)
-w_l     = 1;        % Wage rate - unskilled labor
-w_h     = 7;        % Wage rate - skilled labor
-r       = 0.02;     % Interest rate
+w_l     = 0.2955;        % Wage rate - unskilled labor
+w_h     = 1.8346;        % Wage rate - skilled labor
+r       = 0.1754;     % Interest rate
 P_h     = 1;      % Price of college
 
 %--------------------------%
@@ -51,17 +51,17 @@ P_h     = 1;      % Price of college
 %--------------------------%
 
 % Bequests grid
-gr.nb       = 15;
+gr.nb       = 35;
 gr.bgrid    = linspace(0, 5, gr.nb);           % Grid for health
 
 % Bonds
 gr.na      = 25;
 gr.Abar    = 0;                                 % Exogenous borrowing constraint
 gr.Amax    = 20;
-gr.agrid   = linspace(-gr.Abar, gr.Amax, gr.na);      % Grid for savings
+% gr.agrid   = linspace(-gr.Abar, gr.Amax, gr.na);      % Grid for savings
 
 % Ability: theta
-gr.ntheta       = 15;
+gr.ntheta       = 35;
 gr.thetagrid    = linspace(0, 1, gr.ntheta);          % Grid for savings
 
 

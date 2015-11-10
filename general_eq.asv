@@ -1,4 +1,5 @@
 function error = general_eq(par, gr, P_h, w_l, w_h, r)
+% function [w_l_res, w_h_res, r_res] = general_eq(par, gr, P_h, w_l, w_h, r)
 
 H = zeros(gr.nb, gr.ntheta);
 L = zeros(gr.nb, gr.ntheta);
@@ -7,7 +8,7 @@ A = zeros(gr.nb, gr.ntheta);
 for ib = 1:gr.nb
     for itheta = 1:gr.ntheta
         [ct, at, ht, ut] = utility(par, gr, gr.bgrid(ib), gr.thetagrid(itheta), w_l, w_h, r, P_h);
-        H(ib, itheta) = ht;
+        H(ib, itheta) = ht*(gr.thetagrid(itheta)^par.eta);
         L(ib, itheta) = 1 - ht;
         A(ib, itheta) = at;
     end
@@ -24,7 +25,7 @@ w_h_res = par.A * par.gamma * (par.alpha_h * par.z * (HH^(1-(1/par.phi))) + (1 -
 r_res   = par.A * (par.alpha_h * par.z * (HH^(1-(1/par.phi))) + (1 - par.alpha_h) * (LL^ (1-(1/par.phi))))^((par.gamma * par.phi)/(par.phi - 1)) ...
             * (1-par.gamma) * (KK^(-par.gamma));
 
-% error = (w_l - w_l_res)^2 + (w_h - w_h_res)^2 + (r - r_res)^2;
-error = (w_h - w_h_res)^2 + (r - r_res)^2;
+error = (w_l - w_l_res)^2 + (w_h - w_h_res)^2 + (r - r_res)^2;
+% error = (w_h - w_h_res)^2 + (r - r_res)^2;
         
 end
