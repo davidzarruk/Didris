@@ -29,7 +29,7 @@ double resid(double b, double a, double wl, double wh, double i, double Ph, doub
 
 double bisection(double b, double amin, double amax, double wl, double wh, double i, double Ph, double ppsi, double ttheta, double eeta, int h, double bbeta){
   
-  double p = 0;
+  double p;
   double fa = resid(b, amin, wl, wh, i, Ph, ppsi, ttheta, eeta, h, bbeta);
   double fb = resid(b, amax, wl, wh, i, Ph, ppsi, ttheta, eeta, h, bbeta);
   double mult = fa*fb;
@@ -52,7 +52,13 @@ double bisection(double b, double amin, double amax, double wl, double wh, doubl
     }
   }
   else{
-   /*** Rcout << "La cagaste weeeeyyyy" << std::endl; ***/
+    Rcout << "La cagaste weeeeyyyy" << std::endl;
+    Rcout << "W_L:  " << wl << std::endl;
+    Rcout << "W_H:  " << wh << std::endl;
+    Rcout << "AMIN:  " << amin << std::endl;
+    Rcout << "AMAX:  " << amax << std::endl;
+    Rcout << "R:  " << i << std::endl;
+    p = 25000;
   }
   return p;
 }
@@ -68,6 +74,8 @@ vector<double> grid(double min, double max, int num){
   return ans;
 }
 
+
+// [[Rcpp::export]]
 vector<vector<vector<double> > > utility(vec par, double minb, double maxb, int numb, double minthe, double maxthe, int numthe, double wl, double wh, double r, double Ph){
 
   /*** Initializing matRices  ***/
@@ -111,32 +119,36 @@ vector<vector<vector<double> > > utility(vec par, double minb, double maxb, int 
       b = bgr[k];
       ttheta = tthetagr[j];
       
-      double amin = -wl/(1+r) + pow(10, -20);
-      double amax = b + wl - pow(10, -20);
+      double amin = -wl/(1+r) + pow(10, -3);
+      double amax = b + wl - pow(10, -3);
       
       double a0 = bisection(b, amin, amax, wl, wh, r, Ph, ppsi, ttheta, eeta, 0, bbeta);
+      
+      if(a0==25000){
+        goto endloop;
+      }
       
       if(a0 < -Abar){
         a0 = -Abar;
       } else if(a0 > b + wl){
-        a0 = b + wl - pow(10,-10);
+        a0 = b + wl - pow(10,-3);
       }
       
       if(-Abar < b - Ph){
         if(ttheta != 1){
-          amin = -wl/(1+r) + pow(10, -20);
+          amin = -wl/(1+r) + pow(10, -3);
         } else{
-          amin = -wh/(1+r) + pow(10, -20);
+          amin = -wh/(1+r) + pow(10, -3);
         }
         
-        amax = b - Ph - pow(10, -20);
+        amax = b - Ph - pow(10, -3);
         
         double a1 = bisection(b, amin, amax, wl, wh, r, Ph, ppsi, ttheta, eeta, 1, bbeta);
         
         if(a1 < -Abar){
           a1 = -Abar;
         } else if(a1 > b - Ph){
-          a1 = b - Ph - pow(10,-20);
+          a1 = b - Ph - pow(10,-3);
         }
         
         double u0 = pow(b - a0 + wl, 1 - ppsi)/(1 - ppsi) + bbeta*pow(wl + (1+r)*a0, 1 - ppsi)/(1 - ppsi);
@@ -166,6 +178,7 @@ vector<vector<vector<double> > > utility(vec par, double minb, double maxb, int 
       ans[3][k][j] = ct;
     }
   }
+  endloop:
   return ans; 
 }
 

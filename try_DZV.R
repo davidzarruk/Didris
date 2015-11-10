@@ -10,7 +10,6 @@ setwd("C:\\Users\\david\\Documents\\GitHub\\Didris")
 rm(list=ls())
 set.seed(90)
 
-sourceCpp("compall_sinGSL.cpp")
 sourceCpp("general_eq.cpp")
 
 A = 1;
@@ -74,17 +73,17 @@ for (ib in 1:numb){
 
 size = 10;
 
-HH = array(0,dim=c(size, 1));
-LL = array(0,dim=c(size, 1));
-KK = array(0,dim=c(size, 1));
-WL = array(0,dim=c(size, 1));
-WH = array(0,dim=c(size, 1));
-RR = array(0,dim=c(size, 1));
-codes = array(0,dim=c(size, 1));
-minim = array(0,dim=c(size, 1));
+HH = array(0,dim=c(size, size));
+LL = array(0,dim=c(size, size));
+KK = array(0,dim=c(size, size));
+WL = array(0,dim=c(size, size));
+WH = array(0,dim=c(size, size));
+RR = array(0,dim=c(size, size));
+codes = array(0,dim=c(size, size));
+minim = array(0,dim=c(size, size));
 
 zz = seq(1.1, 2.8, length=size);
-PP = seq(1, 1, length=1);
+PP = seq(0.2, 1, length=size);
 
 # Starting point
 w_l = 0.3; 
@@ -92,42 +91,44 @@ w_h = 1.94;
 r = 0.08;
 
 for(iz in 1:size){
-  for(ip in 1:1){
+  for(ip in 1:size){
     z = zz[iz]; 
     Ph = PP[ip];
     
     param[8] = z;
     
-    f = function(x) residual(param, minb, maxb, numb, minthe, maxthe, numthe, x[1], x[2], x[3], Ph);
+    f = function(x) residual(param, minb, maxb, numb, minthe, maxthe, numthe, exp(x[1]), exp(x[2]), exp(x[3]), Ph);
     
     tryCatch(
       
       expr = {
-        evalWithTimeout( {x = nlm(f, c(w_l, w_h, r), iterlim = 10);
-        
-        sol = x$estimate;
-        w_l = sol[1];
-        w_h = sol[2];
-        r = sol[3];
-        
-        x = nlm(f, c(w_l, w_h, r), iterlim = 100);
-        
-        sol = x$estimate;
-        w_l = sol[1];
-        w_h = sol[2];
-        r = sol[3];
-        
-        caps = general_eq(param, minb, maxb, numb, minthe, maxthe, numthe, w_l, w_h, r, Ph);
-        
-        codes[iz, ip] = x$code;
-        minim[iz, ip] = x$minimum;
-        HH[iz, ip] = caps[2];
-        LL[iz, ip] = caps[3];
-        KK[iz, ip] = caps[4];
-        WL[iz, ip] = sol[1];
-        WH[iz, ip] = sol[2];
-        RR[iz, ip] = sol[3]; }, timeout = 20)
-      },
+        evalWithTimeout( {
+          
+          x = nlm(f, c(w_l, w_h, r), iterlim = 1);
+          
+          sol = x$estimate;
+          w_l = sol[1];
+          w_h = sol[2];
+          r = sol[3];
+          
+          x = nlm(f, c(w_l, w_h, r), iterlim = 100);
+          
+          sol = x$estimate;
+          w_l = exp(sol[1]);
+          w_h = min(exp(sol[2]), 10^10);
+          r   = exp(sol[3]);
+          
+          caps = general_eq(param, minb, maxb, numb, minthe, maxthe, numthe, w_l, w_h, r, Ph);
+          
+          codes[iz, ip] = x$code;
+          minim[iz, ip] = x$minimum;
+          HH[iz, ip] = caps[2];
+          LL[iz, ip] = caps[3];
+          KK[iz, ip] = caps[4];
+          WL[iz, ip] = sol[1];
+          WH[iz, ip] = sol[2];
+          RR[iz, ip] = sol[3]; }, timeout = 20)
+        },
       TimeoutException = function(ex) cat("Timeout. Skipping.\n")
     )
     
