@@ -17,10 +17,9 @@ a_opt = @(a, h) (b - a + w_l*(1-h) - P_h*h)^(-par.psi) - ...
 
 %Plot the function for a grid of a from min to max
 amin=-w_l/(1+r)+1.0e-2;
-amin = -20;
-% amax=b+w_l*(1-h)-Ph*h-1.0e-2;
-amax = 40;
-agrid=amin:0.1:amax;
+amax=b+w_l*(1-h)-Ph*h-1.0e-2;
+
+agrid=linspace(amin,amax,200);
 [~,MM]=size(agrid);
 yyyy=zeros(MM,1);
 for ii=1:1:MM

@@ -3,6 +3,7 @@ library("Rcpp")
 library("RcppArmadillo")
 library("MASS")
 library("R.matlab")
+require(R.utils)
 
 setwd("C:\\Users\\david\\Documents\\GitHub\\Didris")
 
@@ -35,11 +36,11 @@ param[9] = phi;
 
 minb = 0;
 maxb = 5;
-numb = 301;
+numb = 51;
 
 minthe = 0.01;
 maxthe = 0.99;
-numthe = 301;
+numthe = 51;
 
 wl = 0.2955;
 wh = 1.8346;
@@ -71,38 +72,65 @@ for (ib in 1:numb){
 
 # 2. Estimation of general equilibrium prices: w_l, w_h, r
 
-HH = array(0,dim=c(25));
-LL = array(0,dim=c(25));
-KK = array(0,dim=c(25));
-WL = array(0,dim=c(25));
-WH = array(0,dim=c(25));
-RR = array(0,dim=c(25));
+size = 10;
 
-zz = seq(1.1, 1.7, length=5);
+HH = array(0,dim=c(size, 1));
+LL = array(0,dim=c(size, 1));
+KK = array(0,dim=c(size, 1));
+WL = array(0,dim=c(size, 1));
+WH = array(0,dim=c(size, 1));
+RR = array(0,dim=c(size, 1));
+codes = array(0,dim=c(size, 1));
+minim = array(0,dim=c(size, 1));
 
-for(iz in 1:5){
+zz = seq(1.1, 2.8, length=size);
+PP = seq(1, 1, length=1);
 
-  z = zz[iz]; 
-  param[8] = z;
-  
-  f = function(x) residual(param, minb, maxb, numb, minthe, maxthe, numthe, x[1], x[2], x[3], Ph);
-  
-  x = nlm(f, c(0.3, 1.94, 0.08));
-  
-  sol = x$estimate;
-  w_l = sol[1];
-  w_h = sol[2];
-  r = sol[3];
-  
-  caps = general_eq(param, minb, maxb, numb, minthe, maxthe, numthe, w_l, w_h, r, Ph);
-  
-  HH[iz] = caps[2];
-  LL[iz] = caps[3];
-  KK[iz] = caps[4];
-  WL[iz] = sol[1];
-  WH[iz] = sol[2];
-  RR[iz] = sol[3];
-  
-  print(iz);
-  
+# Starting point
+w_l = 0.3; 
+w_h = 1.94; 
+r = 0.08;
+
+for(iz in 1:size){
+  for(ip in 1:1){
+    z = zz[iz]; 
+    Ph = PP[ip];
+    
+    param[8] = z;
+    
+    f = function(x) residual(param, minb, maxb, numb, minthe, maxthe, numthe, x[1], x[2], x[3], Ph);
+    
+    tryCatch(
+      
+      expr = {
+        evalWithTimeout( {x = nlm(f, c(w_l, w_h, r), iterlim = 10);
+        
+        sol = x$estimate;
+        w_l = sol[1];
+        w_h = sol[2];
+        r = sol[3];
+        
+        x = nlm(f, c(w_l, w_h, r), iterlim = 100);
+        
+        sol = x$estimate;
+        w_l = sol[1];
+        w_h = sol[2];
+        r = sol[3];
+        
+        caps = general_eq(param, minb, maxb, numb, minthe, maxthe, numthe, w_l, w_h, r, Ph);
+        
+        codes[iz, ip] = x$code;
+        minim[iz, ip] = x$minimum;
+        HH[iz, ip] = caps[2];
+        LL[iz, ip] = caps[3];
+        KK[iz, ip] = caps[4];
+        WL[iz, ip] = sol[1];
+        WH[iz, ip] = sol[2];
+        RR[iz, ip] = sol[3]; }, timeout = 20)
+      },
+      TimeoutException = function(ex) cat("Timeout. Skipping.\n")
+    )
+    
+    print(paste("Zeta: ", toString(iz), "Price: ", toString(ip)));
+  }
 }

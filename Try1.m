@@ -80,3 +80,10 @@ xlabel('\theta'); ylabel('Bequests')
 title(['People who study'])
 
 % 
+
+
+tic
+general_eq(par, gr, P_h, w_l, w_h, r)
+toc
+
+

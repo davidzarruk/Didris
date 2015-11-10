@@ -52,7 +52,7 @@ double bisection(double b, double amin, double amax, double wl, double wh, doubl
     }
   }
   else{
-    Rcout << "La cagaste weeeeyyyy" << std::endl;
+   /*** Rcout << "La cagaste weeeeyyyy" << std::endl; ***/
   }
   return p;
 }
